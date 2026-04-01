@@ -9,9 +9,9 @@ class UserRepository {
     );
 
     if (emailInUse.rows.length > 0) {
-      return true;
+      return emailInUse.rows[0];
     }
-    return false;
+    return null;
   }
 
   async save(users) {
