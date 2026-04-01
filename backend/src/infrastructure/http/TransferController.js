@@ -3,8 +3,8 @@ const AccountRepository = require("../database/AccountRepository");
 
 class TransferController {
   async handle(request, response) {
-    const { originAccountId, destinationAccountId, amount } = request.body;
-
+    const { destinationAccountId, amount } = request.body;
+    const { originAccountId } = request.user.id;
     const accountRepository = new AccountRepository();
     const transferUseCase = new TransferMoneyUseCase(accountRepository);
 

@@ -20,8 +20,7 @@ class TransferMoneyUseCase {
     originAccount.debit(amount);
     destinationAccount.credit(amount);
 
-    await this.accountRepository.save(originAccount);
-    await this.accountRepository.save(destinationAccount);
+    await this.accountRepository.updateBalancesTransactionally(originAccount, destinationAccount);
 
     return {
       message: "Transferência realizada com sucesso!",
