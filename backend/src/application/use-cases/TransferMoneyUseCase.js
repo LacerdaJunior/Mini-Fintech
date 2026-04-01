@@ -1,4 +1,4 @@
-
+const AppError = require("../../domain/errors/AppError");
 class TransferMoneyUseCase {
   constructor(accountRepository) {
     this.accountRepository = accountRepository;
@@ -11,10 +11,10 @@ class TransferMoneyUseCase {
     );
 
     if (!originAccount) {
-      throw new Error("Conta de origem não encontrada.");
+      throw new AppError("Conta de origem não encontrada.", 404);
     }
     if (!destinationAccount) {
-      throw new Error("Conta de destino não encontrada.");
+      throw new AppError("Conta de destino não encontrada.", 404)
     }
 
     originAccount.debit(amount);

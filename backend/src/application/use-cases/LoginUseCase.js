@@ -1,3 +1,4 @@
+const AppError = require("../../domain/errors/AppError");
 class LoginUseCase {
   constructor(userRepository, bcryptPasswordHasher, tokenGenerator) {
     this.userRepository = userRepository;
@@ -9,7 +10,7 @@ class LoginUseCase {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
-      throw new Error("Credenciais inválidas.");
+      throw new AppError("Credenciais inválidas.", 401);
     }
 
     const userPassword = await this.bcryptPasswordHasher.compare(
@@ -17,7 +18,7 @@ class LoginUseCase {
       user.password
     );
     if (!userPassword) {
-      throw new Error("Credenciais inválidas.");
+      throw new AppError("Credenciais inválidas.", 401);
     }
 
     const token = this.tokenGenerator.generate({ id: user.id, email: user.email });

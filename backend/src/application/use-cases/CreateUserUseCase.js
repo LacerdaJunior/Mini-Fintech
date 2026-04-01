@@ -1,4 +1,5 @@
 const User = require("../../domain/entities/User");
+const AppError = require("../../domain/errors/AppError");
 
 class CreateUserUseCase {
   constructor(userRepository, passwordHasher) {
@@ -10,7 +11,7 @@ class CreateUserUseCase {
     const emailAlreadyExists = await this.userRepository.findByEmail(email);
 
     if (emailAlreadyExists) {
-      throw new Error("Este email já está em uso");
+      throw new AppError("Este e-mail já está em uso.", 409);
     }
 
     const user = new User(Date.now(), name, email, password);
