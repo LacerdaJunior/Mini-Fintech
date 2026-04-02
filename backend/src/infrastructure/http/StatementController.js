@@ -3,7 +3,7 @@ const TransactionRepository = require("../database/TransactionRepository");
 
 class StatementController {
   async handle(request, response) {
-    const { originAccountId } = request.user.id;
+    const originAccountId = request.user.id;
 
     const transactionRepository = new TransactionRepository();
     const getStatementUseCase = new GetStatementUseCase(transactionRepository);

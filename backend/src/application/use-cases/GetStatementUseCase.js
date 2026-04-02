@@ -1,5 +1,5 @@
 const AppError = require("../../domain/errors/AppError");
-class GetSatementUseCase {
+class GetStatementUseCase {
   constructor(transactionRepository) {
     this.transactionRepository = transactionRepository;
   }
@@ -16,4 +16,4 @@ class GetSatementUseCase {
     return transactionList;
   }
 }
-module.exports = GetSatementUseCase;
+module.exports = GetStatementUseCase;

@@ -4,7 +4,6 @@ const UserController = require("./src/infrastructure/http/UserController");
 const LoginController = require("./src/infrastructure/http/LoginController");
 const authMiddleware = require("./src/infrastructure/http/middlewares/AuthMiddleware");
 const StatementController = require("./src/infrastructure/http/StatementController");
-const StatementController = require("./src/infrastructure/http/StatementController");
 require("dotenv").config();
 
 const app = express();

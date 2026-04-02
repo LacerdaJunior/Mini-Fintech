@@ -1,8 +1,12 @@
 const AppError = require("../../domain/errors/AppError");
 const Transaction = require("../../domain/entities/Transaction");
+const crypto = require("crypto");
+
+
 class TransferMoneyUseCase {
-  constructor(accountRepository) {
+  constructor(accountRepository, transactionRepository) {
     this.accountRepository = accountRepository;
+    this.transactionRepository = transactionRepository;
   }
 
   async execute(originAccountId, destinationAccountId, amount) {
@@ -22,12 +26,13 @@ class TransferMoneyUseCase {
     destinationAccount.credit(amount);
 
     const transactionId = crypto.randomUUID();
-    const transaction = new Transaction(transactionId, originAccount, destinationAccount, amount);
+    const transaction = new Transaction(transactionId, originAccount.id, destinationAccount.id, amount);
 
     await this.accountRepository.updateBalancesTransactionally(
-      originAccount,
-      destinationAccount,
-      transaction
+      originAccount.id,
+      destinationAccount.id,
+      transaction,
+      this.transactionRepository
     );
 
     return {

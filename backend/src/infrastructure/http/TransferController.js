@@ -1,12 +1,22 @@
 const TransferMoneyUseCase = require("../../application/use-cases/TransferMoneyUseCase");
 const AccountRepository = require("../database/AccountRepository");
+const TransactionRepository = require("../database/TransactionRepository");
 
 class TransferController {
   async handle(request, response) {
     const { destinationAccountId, amount } = request.body;
-    const { originAccountId } = request.user.id;
+
+    const originAccountId = request.user.id;
+
     const accountRepository = new AccountRepository();
-    const transferUseCase = new TransferMoneyUseCase(accountRepository);
+
+    const transactionRepository = new TransactionRepository();
+
+    
+    const transferUseCase = new TransferMoneyUseCase(
+      accountRepository,
+      transactionRepository
+    );
 
     const result = await transferUseCase.execute(
       originAccountId,
