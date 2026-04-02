@@ -1,7 +1,8 @@
 const pool = require("./connection");
 
 class AccountRepository {
-  async updateBalancesTransactionally(originAccount, destinationAccount) {
+  async updateBalancesTransactionally(originAccount, destinationAccount, transaction,
+    transactionRepository) {
     const client = await pool.connect();
 
     try {
@@ -16,6 +17,8 @@ class AccountRepository {
         destinationAccount.getBalance(),
         destinationAccount.id,
       ]);
+
+      await transactionRepository.save(transaction, client);
 
       await client.query("COMMIT");
     } catch (error) {

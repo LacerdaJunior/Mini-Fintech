@@ -19,6 +19,17 @@ async function createTables() {
         balance DECIMAL(10, 2) NOT NULL DEFAULT 0.00
       );
     `);
+
+    await pool.query(`CREATE TABLE IF NOT EXISTS transactions(
+      id SERIAL PRIMARY KEY,
+      origin_account_id VARCHAR(150) NOT NULL,
+      destination_account_id VARCHAR(150) NOT NULL,
+      amount DECIMAL(10, 2) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      
+      
+      
+      )`);
     console.log(" Tabela 'accounts' criada com sucesso.");
   } catch (error) {
     console.error(" Erro ao criar tabelas:", error);

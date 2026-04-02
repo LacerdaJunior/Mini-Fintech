@@ -1,4 +1,5 @@
 const AppError = require("../../domain/errors/AppError");
+const Transaction = require("../../domain/entities/Transaction");
 class TransferMoneyUseCase {
   constructor(accountRepository) {
     this.accountRepository = accountRepository;
@@ -14,13 +15,20 @@ class TransferMoneyUseCase {
       throw new AppError("Conta de origem não encontrada.", 404);
     }
     if (!destinationAccount) {
-      throw new AppError("Conta de destino não encontrada.", 404)
+      throw new AppError("Conta de destino não encontrada.", 404);
     }
 
     originAccount.debit(amount);
     destinationAccount.credit(amount);
 
-    await this.accountRepository.updateBalancesTransactionally(originAccount, destinationAccount);
+    const transactionId = crypto.randomUUID();
+    const transaction = new Transaction(transactionId, originAccount, destinationAccount, amount);
+
+    await this.accountRepository.updateBalancesTransactionally(
+      originAccount,
+      destinationAccount,
+      transaction
+    );
 
     return {
       message: "Transferência realizada com sucesso!",
