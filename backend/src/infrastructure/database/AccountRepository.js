@@ -15,7 +15,7 @@ class AccountRepository {
     }
     return new Account(
       accountData.id,
-      accountData.user_id,
+      accountData.owner_name,
       accountData.balance
     );
   }
@@ -45,6 +45,14 @@ class AccountRepository {
     } finally {
       client.release();
     }
+  }
+
+  async save(account) {
+    const newAccount = await pool.query(
+      "INSERT INTO accounts (id, owner_name, balance) VALUES ($1, $2, $3)",
+      [account.id, account.ownerName, account.balance]
+    );
+    return newAccount;
   }
 }
 

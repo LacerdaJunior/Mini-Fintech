@@ -1,5 +1,5 @@
-const Account = require("./src/domain/entities/Account");
-const TransferMoneyUseCase = require("./src/application/use-cases/TransferMoneyUseCase");
+const Account = require("../src/domain/entities/Account");
+const TransferMoneyUseCase = require("../src/application/use-cases/TransferMoneyUseCase");
 
 const contaGuilherme = new Account(1, "Guilherme", 100);
 const contaJoao = new Account(2, "Joao", 50);

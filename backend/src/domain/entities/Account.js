@@ -1,6 +1,6 @@
 class Account {
-  constructor(id, owner, initialBalance = 0) {
-    (this.id = id), (this.owner = owner);
+  constructor(id, ownerName, initialBalance = 0) {
+    (this.id = id), (this.ownerName = ownerName);
     this.balance = initialBalance;
   }
 
