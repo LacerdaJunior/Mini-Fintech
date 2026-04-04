@@ -5,6 +5,8 @@ const LoginController = require("./src/infrastructure/http/LoginController");
 const authMiddleware = require("./src/infrastructure/http/middlewares/AuthMiddleware");
 const StatementController = require("./src/infrastructure/http/StatementController");
 const AccountController = require("./src/infrastructure/http/AccountController");
+const DepositController = require("./src/infrastructure/http/DepositController");
+
 require("dotenv").config();
 
 const app = express();
@@ -16,6 +18,7 @@ const userController = new UserController();
 const loginController = new LoginController();
 const statementController = new StatementController();
 const accountController = new AccountController();
+const depositController = new DepositController();
 
 app.post("/users", (req, res) => {
   return userController.handle(req, res);
@@ -27,6 +30,10 @@ app.post("/login", (request, response) => {
 
 app.post("/accounts", authMiddleware, (request, response) => {
   return accountController.handle(request, response);
+});
+
+app.post("/deposits", authMiddleware, (request, response) => {
+  return depositController.handle(request, response);
 });
 
 app.post("/transfers", authMiddleware, (request, response) => {

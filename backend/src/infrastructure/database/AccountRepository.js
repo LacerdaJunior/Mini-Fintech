@@ -54,6 +54,24 @@ class AccountRepository {
     );
     return newAccount;
   }
+
+  async depositTransactionally(account, transaction, transactionRepository) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("UPDATE accounts SET balance = $1 WHERE id = $2", [
+        account.getBalance(),
+        account.id,
+      ]);
+      await transactionRepository.save(transaction, client);
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
 }
 
 module.exports = AccountRepository;
