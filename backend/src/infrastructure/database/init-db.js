@@ -5,6 +5,7 @@ async function createTables() {
     await pool.query(`DROP TABLE IF EXISTS transactions;`);
     await pool.query(`DROP TABLE IF EXISTS accounts;`);
     await pool.query(`DROP TABLE IF EXISTS users;`);
+    await pool.query(`DROP TABLE IF EXISTS pix_keys;`);
     console.log("🗑️ Tabelas antigas removidas.");
 
     await pool.query(`
@@ -36,6 +37,16 @@ async function createTables() {
       );
     `);
     console.log("✅ Tabela 'transactions' criada (Suporte a UUID).");
+
+    await pool.query(`
+      CREATE TABLE pix_keys (
+        id VARCHAR(36) PRIMARY KEY,
+        key_type VARCHAR(20) NOT NULL, -- Ex: 'CPF' ou 'EMAIL'
+        key_value VARCHAR(150) UNIQUE NOT NULL, -- Ex: 'gui@fintech.com'
+        account_id VARCHAR(36) REFERENCES accounts(id) ON DELETE CASCADE
+      );
+    `);
+    console.log("✅ Tabela 'pix_keys' criada (Relacionamento com Accounts).");
   } catch (error) {
     console.error("❌ Erro ao criar tabelas:", error);
   } finally {
