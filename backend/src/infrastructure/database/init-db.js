@@ -6,6 +6,7 @@ async function createTables() {
     await pool.query(`DROP TABLE IF EXISTS pix_keys;`);
     await pool.query(`DROP TABLE IF EXISTS accounts;`);
     await pool.query(`DROP TABLE IF EXISTS users;`);
+    await pool.query(`DROP TABLE IF EXISTS idempotency_keys;`);
     console.log("Tabelas antigas removidas.");
 
     await pool.query(`
@@ -41,12 +42,23 @@ async function createTables() {
     await pool.query(`
       CREATE TABLE pix_keys (
         id VARCHAR(36) PRIMARY KEY,
-        key_type VARCHAR(20) NOT NULL, -- Ex: 'CPF' ou 'EMAIL'
-        key_value VARCHAR(150) UNIQUE NOT NULL, -- Ex: 'gui@fintech.com'
+        key_type VARCHAR(20) NOT NULL, 
+        key_value VARCHAR(150) UNIQUE NOT NULL, 
         account_id VARCHAR(36) REFERENCES accounts(id) ON DELETE CASCADE
       );
     `);
     console.log("✅ Tabela 'pix_keys' criada (Relacionamento com Accounts).");
+
+    await pool.query(`
+      CREATE TABLE idempotency_keys (
+        key VARCHAR(100) PRIMARY KEY,
+        path VARCHAR(255) NOT NULL,
+        status_code INTEGER NOT NULL, 
+        response_body JSON NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log("✅ Tabela 'idempotency_keys' criada.");
   } catch (error) {
     console.error("❌ Erro ao criar tabelas:", error);
   } finally {

@@ -3,6 +3,7 @@ const TransferController = require("./src/infrastructure/http/TransferController
 const UserController = require("./src/infrastructure/http/UserController");
 const LoginController = require("./src/infrastructure/http/LoginController");
 const authMiddleware = require("./src/infrastructure/http/middlewares/AuthMiddleware");
+const idempotencyMiddleware = require("./src/infrastructure/http/middlewares/idempotencyMiddleware");
 const StatementController = require("./src/infrastructure/http/StatementController");
 const AccountController = require("./src/infrastructure/http/AccountController");
 const DepositController = require("./src/infrastructure/http/DepositController");
@@ -48,9 +49,14 @@ app.post("/pix", authMiddleware, (request, response) => {
   return pixKeyController.handle(request, response);
 });
 
-app.post("/pix/transfer", authMiddleware, (request, response) => {
-  return pixTransferController.handle(request, response);
-});
+app.post(
+  "/pix/transfer", 
+  authMiddleware, 
+  idempotencyMiddleware, 
+  (request, response) => {
+    return pixTransferController.handle(request, response);
+  }
+);
 
 app.get("/statements", authMiddleware, (request, response) => {
   return statementController.handle(request, response);
