@@ -7,7 +7,7 @@ const StatementController = require("./src/infrastructure/http/StatementControll
 const AccountController = require("./src/infrastructure/http/AccountController");
 const DepositController = require("./src/infrastructure/http/DepositController");
 const PixKeyController = require("./src/infrastructure/http/PixKeyController");
-
+const PixTransferController = require("./src/infrastructure/http/PixTransferController");
 
 require("dotenv").config();
 
@@ -22,6 +22,7 @@ const statementController = new StatementController();
 const accountController = new AccountController();
 const depositController = new DepositController();
 const pixKeyController = new PixKeyController();
+const pixTransferController = new PixTransferController();
 
 app.post("/users", (req, res) => {
   return userController.handle(req, res);
@@ -45,6 +46,10 @@ app.post("/transfers", authMiddleware, (request, response) => {
 
 app.post("/pix", authMiddleware, (request, response) => {
   return pixKeyController.handle(request, response);
+});
+
+app.post("/pix/transfer", authMiddleware, (request, response) => {
+  return pixTransferController.handle(request, response);
 });
 
 app.get("/statements", authMiddleware, (request, response) => {

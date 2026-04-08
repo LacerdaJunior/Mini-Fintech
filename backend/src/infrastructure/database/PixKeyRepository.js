@@ -3,7 +3,7 @@ const pool = require("./connection");
 const PixKey = require("../../domain/entities/PixKey");
 
 class PixKeyRepository {
-  async findBykey(keyValue) {
+  async findByKey(keyValue) {
     const result = await pool.query(
       `
        SELECT * FROM pix_keys WHERE key_value = $1`,
