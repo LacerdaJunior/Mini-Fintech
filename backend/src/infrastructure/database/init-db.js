@@ -3,10 +3,10 @@ const pool = require("./connection");
 async function createTables() {
   try {
     await pool.query(`DROP TABLE IF EXISTS transactions;`);
+    await pool.query(`DROP TABLE IF EXISTS pix_keys;`);
     await pool.query(`DROP TABLE IF EXISTS accounts;`);
     await pool.query(`DROP TABLE IF EXISTS users;`);
-    await pool.query(`DROP TABLE IF EXISTS pix_keys;`);
-    console.log("🗑️ Tabelas antigas removidas.");
+    console.log("Tabelas antigas removidas.");
 
     await pool.query(`
       CREATE TABLE users (
@@ -22,21 +22,21 @@ async function createTables() {
       CREATE TABLE accounts (
         id VARCHAR(36) PRIMARY KEY,
         owner_name VARCHAR(100) NOT NULL,
-        balance DECIMAL(10, 2) NOT NULL DEFAULT 0.00
+        balance INTEGER DEFAULT 0 
       );
     `);
-    console.log("✅ Tabela 'accounts' criada (Suporte a UUID).");
+    console.log("✅ Tabela 'accounts' criada.");
 
     await pool.query(`
-      CREATE TABLE transactions(
+      CREATE TABLE transactions (
         id VARCHAR(36) PRIMARY KEY,
-        origin_account_id VARCHAR(36) NOT NULL,
-        destination_account_id VARCHAR(36) NOT NULL,
-        amount DECIMAL(10, 2) NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        account_id VARCHAR(36) REFERENCES accounts(id) ON DELETE CASCADE,
+        amount INTEGER NOT NULL, 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    console.log("✅ Tabela 'transactions' criada (Suporte a UUID).");
+    console.log("✅ Tabela 'transactions' criada.");
 
     await pool.query(`
       CREATE TABLE pix_keys (
