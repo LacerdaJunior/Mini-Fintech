@@ -6,7 +6,7 @@ class TransactionRepository {
       `
         INSERT INTO transactions (
           id,
-          origin_account_id,
+          account_id,
           destination_account_id,
           amount
         )
@@ -21,16 +21,14 @@ class TransactionRepository {
     );
   }
 
-  async getStatement(accountId) {
+  async getStatement(accountId, limit, offset) {
     const result = await pool.query(
       `
         SELECT *
         FROM transactions
-        WHERE origin_account_id = $1
-           OR destination_account_id = $1
+        WHERE account_id = $1
         ORDER BY created_at DESC
-        `,
-      [accountId]
+        LIMIT $2 OFFSET $3`, [(accountId, limit, offset)]
     );
 
     return result.rows;

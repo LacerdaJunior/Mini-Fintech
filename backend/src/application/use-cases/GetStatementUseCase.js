@@ -4,14 +4,14 @@ class GetStatementUseCase {
     this.transactionRepository = transactionRepository;
   }
 
-  async execute(accountId) {
-    const transactionList = await this.transactionRepository.getStatement(
-      accountId
-    );
+  async execute(accountId, page, limit) {
+    const offset = (page - 1) * limit;
 
-    if (!accountId) {
-      throw new AppError("Transações do usuário não encontradas.");
-    }
+    const transactionList = await this.transactionRepository.getStatement(
+      accountId,
+      limit,
+      offset
+    );
 
     return transactionList;
   }
