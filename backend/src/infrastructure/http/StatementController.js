@@ -1,6 +1,7 @@
 const GetStatementUseCase = require("../../application/use-cases/GetStatementUseCase");
 const TransactionRepository = require("../database/TransactionRepository");
 
+
 class StatementController {
   async handle(request, response) {
     const originAccountId = request.user.id;

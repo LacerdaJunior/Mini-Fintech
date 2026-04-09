@@ -2,69 +2,53 @@ const CreatePixKeyUseCase = require("../../../src/application/use-cases/CreatePi
 const AppError = require("../../../src/domain/errors/AppError");
 
 describe("CreatePixKeyUseCase", () => {
+  let mockPixKeyRepository;
+  let mockAccountRepository;
+  let useCase;
+
+  beforeEach(() => {
+   
+    mockAccountRepository = {
+      getByUserId: jest.fn(), 
+    };
+
+    mockPixKeyRepository = {
+      findByKey: jest.fn(),
+      save: jest.fn(),
+    };
+
+    useCase = new CreatePixKeyUseCase(mockPixKeyRepository, mockAccountRepository);
+  });
+
   it("deve cadastrar uma chave PIX com sucesso", async () => {
-    const mockAccountRepository = {
-      getById: jest
-        .fn()
-        .mockResolvedValue({ id: "id-conta-123", ownerName: "Usuário Teste" }),
-    };
-    const mockPixKeyRepository = {
-      findBykey: jest.fn().mockResolvedValue(null),
-      save: jest.fn().mockResolvedValue(),
-    };
+    const mockAccount = { id: "acc-123", ownerName: "Guilherme" };
+    
+   
+    mockAccountRepository.getByUserId.mockResolvedValue(mockAccount);
+    mockPixKeyRepository.findByKey.mockResolvedValue(null);
 
-    const useCase = new CreatePixKeyUseCase(
-      mockPixKeyRepository,
-      mockAccountRepository
-    );
-
-    const result = await useCase.execute(
-      "id-conta-123",
-      "EMAIL",
-      "teste@fintech.com"
-    );
+    const result = await useCase.execute("user-123", "EMAIL", "gui@fintech.com");
 
     expect(result.message).toBe("Chave PIX cadastrada com sucesso");
-    expect(result.pixKey.keyValue).toBe("teste@fintech.com");
-    expect(mockPixKeyRepository.save).toHaveBeenCalledTimes(1);
+    expect(mockPixKeyRepository.save).toHaveBeenCalled();
   });
 
   it("deve lançar erro 404 se a conta não existir", async () => {
-    const mockAccountRepository = {
-      getById: jest.fn().mockResolvedValue(null),
-    };
-    const mockPixKeyRepository = {};
-
-    const useCase = new CreatePixKeyUseCase(
-      mockPixKeyRepository,
-      mockAccountRepository
-    );
+   
+    mockAccountRepository.getByUserId.mockResolvedValue(null);
 
     await expect(
-      useCase.execute("conta-invalida", "EMAIL", "teste@fintech.com")
-    ).rejects.toBeInstanceOf(AppError);
+      useCase.execute("user-invalido", "EMAIL", "teste@fintech.com")
+    ).rejects.toThrow("Conta não encontrada para este usuário.");
   });
 
   it("deve lançar erro 409 se a chave PIX já estiver em uso", async () => {
-    const mockAccountRepository = {
-      getById: jest.fn().mockResolvedValue({ id: "id-conta-123" }),
-    };
-    const mockPixKeyRepository = {
-      findBykey: jest
-        .fn()
-        .mockResolvedValue({
-          id: "chave-antiga",
-          key_value: "teste@fintech.com",
-        }),
-    };
-
-    const useCase = new CreatePixKeyUseCase(
-      mockPixKeyRepository,
-      mockAccountRepository
-    );
+    mockAccountRepository.getByUserId.mockResolvedValue({ id: "acc-123" });
+   
+    mockPixKeyRepository.findByKey.mockResolvedValue({ id: "key-old" });
 
     await expect(
-      useCase.execute("id-conta-123", "EMAIL", "teste@fintech.com")
-    ).rejects.toBeInstanceOf(AppError);
+      useCase.execute("user-123", "EMAIL", "teste@fintech.com")
+    ).rejects.toThrow("Chave pix informada já está em uso.");
   });
 });

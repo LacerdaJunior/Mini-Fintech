@@ -1,6 +1,21 @@
 version: "3.8"
 
 services:
+  app:
+    build: ./backend
+    container_name: minifintech_api
+    ports:
+      - "4949:4949"
+    environment:
+      - DB_HOST=db
+      - DB_USER=admin
+      - DB_PASS=adminpassword
+      - DB_NAME=fintech_database
+      - DB_PORT=5432
+      - JWT_SECRET=key
+    depends_on:
+      - db
+
   db:
     image: postgres:15-alpine
     container_name: minifintech_postgres

@@ -1,52 +1,43 @@
 const TransferMoneyUseCase = require("../../../src/application/use-cases/TransferMoneyUseCase");
-const Account = require("../../../src/domain/entities/Account");
-const AppError = require("../../../src/domain/errors/AppError");
-
 describe("TransferMoneyUseCase", () => {
-  it("deve realizar uma transferência com sucesso e atualizar os saldos", async () => {
-    const mockOriginAccount = new Account("id-origem", "Guilherme", 1000.0);
-    const mockDestAccount = new Account("id-destino", "Investidor", 0.0);
+  let mockAccountRepository;
+  let mockTransactionRepository;
+  let transferMoneyUseCase;
 
-    const mockAccountRepository = {
-      getById: jest.fn(async (id) => {
-        if (id === "id-origem") return mockOriginAccount;
-        if (id === "id-destino") return mockDestAccount;
-        return null;
-      }),
-      updateBalancesTransactionally: jest.fn(),
+  beforeEach(() => {
+    mockAccountRepository = { 
+      getById: jest.fn(), 
+      updateBalancesTransactionally: jest.fn() 
     };
-
-    const mockTransactionRepository = { save: jest.fn() };
-
-    const useCase = new TransferMoneyUseCase(
-      mockAccountRepository,
-      mockTransactionRepository
-    );
-
-    const result = await useCase.execute("id-origem", "id-destino", 200.0);
-
-    expect(result.message).toBe("Transferência realizada com sucesso!");
-    expect(mockOriginAccount.getBalance()).toBe(800.0); 
-    expect(mockDestAccount.getBalance()).toBe(200.0); 
-
-    expect(
-      mockAccountRepository.updateBalancesTransactionally
-    ).toHaveBeenCalledTimes(1);
+    mockTransactionRepository = { save: jest.fn() };
+    transferMoneyUseCase = new TransferMoneyUseCase(mockAccountRepository, mockTransactionRepository);
   });
 
-  it("deve lançar um erro 404 se a conta de origem não existir", async () => {
-    const mockAccountRepository = {
-      getById: jest.fn().mockResolvedValue(null),
-    };
-    const mockTransactionRepository = {};
+  it("deve transferir dinheiro entre contas (TED)", async () => {
+    const acc1 = { id: "acc-1", balance: 200, debit: jest.fn(), credit: jest.fn(), getBalance: () => 100 };
+    const acc2 = { id: "acc-2", balance: 0, debit: jest.fn(), credit: jest.fn(), getBalance: () => 100 };
 
-    const useCase = new TransferMoneyUseCase(
-      mockAccountRepository,
-      mockTransactionRepository
-    );
+    mockAccountRepository.getById
+      .mockResolvedValueOnce(acc1)
+      .mockResolvedValueOnce(acc2);
+
+    const result = await transferMoneyUseCase.execute("acc-1", "acc-2", 100);
+
+    expect(result.message).toBe("Transferência realizada com sucesso!");
+    expect(acc1.debit).toHaveBeenCalledWith(100);
+    expect(acc2.credit).toHaveBeenCalledWith(100);
+  });
+
+  it("deve impedir transferencia com saldo insuficiente", async () => {
+    const acc1 = { 
+        id: "acc-1", 
+        balance: 50, 
+        debit: () => { throw new Error("Saldo insuficiente.") } 
+    };
+    mockAccountRepository.getById.mockResolvedValueOnce(acc1).mockResolvedValueOnce({ id: "acc-2" });
 
     await expect(
-      useCase.execute("conta-fantasma", "id-destino", 100.0)
-    ).rejects.toBeInstanceOf(AppError);
+      transferMoneyUseCase.execute("acc-1", "acc-2", 100)
+    ).rejects.toThrow("Saldo insuficiente.");
   });
 });

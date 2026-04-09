@@ -1,17 +1,11 @@
 class Transaction {
-  constructor(id, type, accountId, amount) {
-    if (!Number.isInteger(amount)) {
-      throw new Error(
-        "O valor da transação deve ser um número inteiro (em centavos)."
-      );
-    }
-
+  constructor(id, type, originAccountId, amount, destinationAccountId = null) {
     this.id = id;
     this.type = type;
-    this.accountId = accountId;
+    this.originAccountId = originAccountId;
+    this.destinationAccountId = destinationAccountId;
     this.amount = amount;
     this.createdAt = new Date();
   }
 }
-
 module.exports = Transaction;

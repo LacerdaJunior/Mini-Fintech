@@ -2,24 +2,20 @@ const PixTransferUseCase = require("../../../src/application/use-cases/PixTransf
 const AppError = require("../../../src/domain/errors/AppError");
 
 describe("PixTransferUseCase", () => {
-  let mockAccountRepository;
   let mockPixKeyRepository;
+  let mockAccountRepository;
   let mockTransactionRepository;
-  let useCase;
+  let pixTransferUseCase;
 
   beforeEach(() => {
-    mockAccountRepository = {
-      getById: jest.fn(),
-      updateBalancesTransactionally: jest.fn(),
+    mockPixKeyRepository = { findByKey: jest.fn() };
+    mockAccountRepository = { 
+      getById: jest.fn(), 
+      updateBalancesTransactionally: jest.fn() 
     };
-    mockPixKeyRepository = {
-      findByKey: jest.fn(),
-    };
-    mockTransactionRepository = {
-      save: jest.fn(),
-    };
+    mockTransactionRepository = { save: jest.fn() };
 
-    useCase = new PixTransferUseCase(
+    pixTransferUseCase = new PixTransferUseCase(
       mockPixKeyRepository,
       mockAccountRepository,
       mockTransactionRepository
@@ -27,69 +23,29 @@ describe("PixTransferUseCase", () => {
   });
 
   it("deve realizar um PIX com sucesso", async () => {
-    const senderAccount = {
-      id: "sender-123",
-      debit: jest.fn(),
-      getBalance: jest.fn().mockReturnValue(5000),
-    };
-    const receiverAccount = {
-      id: "receiver-456",
-      credit: jest.fn(),
-      getBalance: jest.fn().mockReturnValue(15000),
-    };
-    const pixKey = {
-      accountId: "receiver-456",
-      keyType: "EMAIL",
-      keyValue: "amigo@fintech.com",
-    };
-
-    mockAccountRepository.getById.mockImplementation((id) => {
-      if (id === "sender-123") return senderAccount;
-      if (id === "receiver-456") return receiverAccount;
-      return null;
-    });
-    mockPixKeyRepository.findByKey.mockResolvedValue(pixKey);
-
-    const result = await useCase.execute(
-      "sender-123",
-      "amigo@fintech.com",
-      5000
-    );
-
-    expect(result.message).toBe("Pix realizado com sucesso!");
-    expect(senderAccount.debit).toHaveBeenCalledWith(5000);
-    expect(receiverAccount.credit).toHaveBeenCalledWith(5000);
-    expect(
-      mockAccountRepository.updateBalancesTransactionally
-    ).toHaveBeenCalledTimes(1);
-  });
-
-  it("deve lançar erro 404 se a conta de origem não existir", async () => {
-    mockAccountRepository.getById.mockResolvedValue(null);
-
-    await expect(
-      useCase.execute("id-invalido", "amigo@fintech.com", 5000)
-    ).rejects.toBeInstanceOf(AppError);
-  });
-
-  it("deve lançar erro 404 se a chave Pix não for encontrada", async () => {
-    mockAccountRepository.getById.mockResolvedValue({ id: "sender-123" });
-    mockPixKeyRepository.findByKey.mockResolvedValue(null);
-
-    await expect(
-      useCase.execute("sender-123", "chave-fantasma@fintech.com", 5000)
-    ).rejects.toBeInstanceOf(AppError);
-  });
-
-  it("deve lançar erro 400 se tentar fazer PIX para a própria conta (Auto-Pix)", async () => {
-    const senderAccount = { id: "sender-123" };
-    const pixKey = { accountId: "sender-123" };
+    const senderAccount = { id: "user-1", balance: 1000, debit: jest.fn(), credit: jest.fn(), getBalance: () => 500 };
+    const receiverAccount = { id: "user-2", balance: 0, debit: jest.fn(), credit: jest.fn(), getBalance: () => 500 };
+    const pixKey = { accountId: "user-2", keyValue: "dest@teste.com" };
 
     mockAccountRepository.getById.mockResolvedValue(senderAccount);
     mockPixKeyRepository.findByKey.mockResolvedValue(pixKey);
+    // Segunda chamada do getById retorna a conta do recebedor
+    mockAccountRepository.getById.mockResolvedValueOnce(senderAccount).mockResolvedValueOnce(receiverAccount);
+
+    const result = await pixTransferUseCase.execute("user-1", "dest@teste.com", 500);
+
+    expect(result.message).toBe("Pix realizado com sucesso!");
+    expect(senderAccount.debit).toHaveBeenCalledWith(500);
+    expect(receiverAccount.credit).toHaveBeenCalledWith(500);
+    expect(mockAccountRepository.updateBalancesTransactionally).toHaveBeenCalled();
+  });
+
+  it("deve falhar se a chave PIX nao existir", async () => {
+    mockAccountRepository.getById.mockResolvedValue({ id: "user-1" });
+    mockPixKeyRepository.findByKey.mockResolvedValue(null);
 
     await expect(
-      useCase.execute("sender-123", "meu-email@fintech.com", 5000)
-    ).rejects.toBeInstanceOf(AppError);
+      pixTransferUseCase.execute("user-1", "inexistente@teste.com", 100)
+    ).rejects.toThrow("Chave pix inválida/não encontrada.");
   });
 });

@@ -4,17 +4,18 @@ const UserController = require("./src/infrastructure/http/UserController");
 const LoginController = require("./src/infrastructure/http/LoginController");
 const authMiddleware = require("./src/infrastructure/http/middlewares/AuthMiddleware");
 const idempotencyMiddleware = require("./src/infrastructure/http/middlewares/idempotencyMiddleware");
+const { swaggerUi, specs } = require("./src/infrastructure/http/swagger");
 const StatementController = require("./src/infrastructure/http/StatementController");
 const AccountController = require("./src/infrastructure/http/AccountController");
 const DepositController = require("./src/infrastructure/http/DepositController");
 const PixKeyController = require("./src/infrastructure/http/PixKeyController");
 const PixTransferController = require("./src/infrastructure/http/PixTransferController");
-
 require("dotenv").config();
 
 const app = express();
 
 app.use(express.json());
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 const transferController = new TransferController();
 const userController = new UserController();

@@ -22,6 +22,7 @@ async function createTables() {
     await pool.query(`
       CREATE TABLE accounts (
         id VARCHAR(36) PRIMARY KEY,
+        user_id VARCHAR(36) REFERENCES users(id) ON DELETE CASCADE, -- ESSA LINHA AQUI!
         owner_name VARCHAR(100) NOT NULL,
         balance INTEGER DEFAULT 0 
       );
@@ -30,12 +31,13 @@ async function createTables() {
 
     await pool.query(`
       CREATE TABLE transactions (
-        id VARCHAR(36) PRIMARY KEY,
-        type VARCHAR(50) NOT NULL,
-        account_id VARCHAR(36) REFERENCES accounts(id) ON DELETE CASCADE,
-        amount INTEGER NOT NULL, 
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
+      id VARCHAR(36) PRIMARY KEY,
+      type VARCHAR(50) NOT NULL, 
+      account_id VARCHAR(36) REFERENCES accounts(id) ON DELETE CASCADE, 
+      destination_account_id VARCHAR(36) REFERENCES accounts(id) ON DELETE CASCADE,
+      amount INTEGER NOT NULL, 
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
     `);
     console.log("✅ Tabela 'transactions' criada.");
 
