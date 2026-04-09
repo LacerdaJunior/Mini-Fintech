@@ -5,8 +5,9 @@ Uma API de serviços bancários completa, construída com foco em **integridade 
 ## 🛠️ Tecnologias e Conceitos
 - **Node.js & Express**: Engine principal.
 - **PostgreSQL**: Banco de dados relacional com transações ACID.
+- **Docker & Docker Compose**: Conteinerização e orquestração de infraestrutura.
 - **Clean Architecture**: Separação clara entre Domínio, Casos de Uso e Infraestrutura.
-- **Jest**: 100% de cobertura nos fluxos críticos de negócio.
+- **Jest**: 100% de cobertura nos fluxos críticos de negócio (22 testes).
 - **Swagger (OpenAPI)**: Documentação interativa e guiada.
 - **JWT**: Autenticação e proteção de rotas.
 - **Idempotency**: Proteção contra duplicidade de transações.
@@ -18,15 +19,18 @@ Uma API de serviços bancários completa, construída com foco em **integridade 
 - [x] **Segurança Financeira**: Validação de saldo e travas de segurança.
 - [x] **Extrato Paginado**: Consulta de histórico com alta performance.
 
-## 📖 Como testar
-1. Clone o repositório.
-2. Configure o seu `.env` com as credenciais do Postgres.
-3. Execute `node src/infrastructure/database/init-db.js` para preparar o banco.
-4. Rode `npm start`.
-5. Acesse `http://localhost:4949/api-docs` para o guia interativo.
+## 🐳 Como rodar (Docker - Recomendado)
+O projeto está totalmente conteinerizado. Para subir a API e o Banco de Dados com um único comando:
 
-## 🧪 Testes
+1. Certifique-se de ter o Docker instalado.
+2. Na raiz do projeto, execute:
+   ```bash
+   docker-compose up --build
+
+3. Acesse http://localhost:4949/api-docs para o guia interativo.
+
+🧪 Testes
 Execute os testes automatizados para garantir a integridade do sistema:
-\`\`\`bash
+```bash
 npm test
-\`\`\`
+```
